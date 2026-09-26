@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en-US">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Convert a Revised Julian civil date into the modern lunisolar Shamrock Calendar.">
+  <meta name="theme-color" content="#04151b">
+  <title>Shamrock Calendar — A joyful lunisolar calendar</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%2304151b'/%3E%3Cg fill='%237fd4c7' stroke='%23d9b55d' stroke-width='2'%3E%3Cpath d='M32 31C18 29 14 19 20 14c6-5 13 1 12 14-1-13 6-19 12-14 6 5 2 15-12 17 14-2 18 8 12 13-6 5-13-1-12-14 1 13-6 19-12 14-6-5-2-15 12-13z'/%3E%3C/g%3E%3C/svg%3E">
+  <link rel="preload" as="image" href="assets/shamrock-calendar-night.png">
+  <link rel="stylesheet" href="assets/styles.css?v=20260926-1">
+  <script src="assets/calendar-engine.js?v=20260926-1" defer></script>
+  <script src="assets/app.js?v=20260926-1" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#calculator" data-i18n="a11y.skip">Skip to the calculator</a>
+
+  <header class="site-header">
+    <div class="shell header-inner">
+      <a class="brand" href="#top" aria-label="Shamrock Calendar">
+        <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true">
+          <path d="M32 31C18 29 14 19 20 14c6-5 13 1 12 14-1-13 6-19 12-14 6 5 2 15-12 17 14-2 18 8 12 13-6 5-13-1-12-14 1 13-6 19-12 14-6-5-2-15 12-13z"/>
+        </svg>
+        <span><strong>SHAMROCK CALENDAR</strong><small data-i18n="brand.product">A Singer Shamrock calendar system</small></span>
+      </a>
+      <div class="language-switcher" role="group" data-i18n-aria="lang.group">
+        <button type="button" class="language-button" data-language="en" aria-pressed="true" data-i18n-aria="lang.en"><span aria-hidden="true">🇺🇸</span></button>
+        <button type="button" class="language-button" data-language="fr" aria-pressed="false" data-i18n-aria="lang.fr"><span aria-hidden="true">🇨🇦</span></button>
+        <button type="button" class="language-button" data-language="de" aria-pressed="false" data-i18n-aria="lang.de"><span aria-hidden="true">🇩🇪</span></button>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-art" aria-hidden="true">
+        <img src="assets/shamrock-calendar-night.png" alt="" width="1672" height="941">
+      </div>
+      <div class="hero-shade" aria-hidden="true"></div>
+      <div class="shell hero-inner">
+        <div class="hero-copy">
+          <p class="eyebrow" data-i18n="hero.eyebrow">A modern lunisolar calendar</p>
+          <h1 id="hero-title"><span data-i18n="hero.titleA">A new year</span><br><em data-i18n="hero.titleB">under the moon.</em></h1>
+          <p class="hero-lead" data-i18n="hero.lead">Twelve Irish month names, a thirteenth month when needed, and Halloween as a joyful New Year.</p>
+        </div>
+
+        <section class="calculator" id="calculator" aria-labelledby="calculator-title">
+          <div class="calculator-heading">
+            <div>
+              <p class="section-kicker" data-i18n="calc.kicker">Calendar converter</p>
+              <h2 id="calculator-title" data-i18n="calc.title">Find your Shamrock date</h2>
+            </div>
+            <span class="basis-pill" data-i18n="calc.basis">Revised Julian input</span>
+          </div>
+
+          <form id="date-form" novalidate>
+            <div class="date-fields">
+              <div class="field field-day">
+                <label for="day" data-i18n="field.day">Day</label>
+                <input id="day" name="day" type="text" inputmode="numeric" autocomplete="off" maxlength="2" aria-describedby="range-note error-message">
+              </div>
+              <div class="field field-month">
+                <label for="month" data-i18n="field.month">Month</label>
+                <select id="month" name="month" aria-describedby="range-note error-message"></select>
+              </div>
+              <div class="field field-year">
+                <label for="year" data-i18n="field.year">Year</label>
+                <input id="year" name="year" type="text" inputmode="numeric" autocomplete="off" maxlength="4" aria-describedby="range-note error-message">
+              </div>
+              <div class="field field-era">
+                <label for="era" data-i18n="field.era">Era</label>
+                <select id="era" name="era" aria-describedby="range-note error-message">
+                  <option value="ce" data-i18n="era.ce">CE</option>
+                  <option value="bce" data-i18n="era.bce">BCE</option>
+                </select>
+              </div>
+              <button class="calculate-button" type="submit">
+                <span data-i18n="calc.button">Calculate</span><span aria-hidden="true">→</span>
+              </button>
+            </div>
+            <p class="range-note" id="range-note" data-i18n="calc.range">Valid range: 31 October 2574 BCE to 20 November 2427 CE.</p>
+            <p class="error-message" id="error-message" role="alert" aria-live="assertive"></p>
+          </form>
+
+          <div class="result-panel" id="result-panel" role="status" aria-live="polite" aria-atomic="true">
+            <div class="result-primary">
+              <p class="result-label" data-i18n="result.label">Your Shamrock date</p>
+              <p class="result-date" id="result-date">—</p>
+              <div class="festival-badge" id="festival-badge" hidden>
+                <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 31C18 29 14 19 20 14c6-5 13 1 12 14-1-13 6-19 12-14 6 5 2 15-12 17 14-2 18 8 12 13-6 5-13-1-12-14 1 13-6 19-12 14-6-5-2-15 12-13z"/></svg>
+                <span id="festival-text"></span>
+              </div>
+            </div>
+            <dl class="result-details">
+              <div><dt data-i18n="result.selected">Selected date</dt><dd id="selected-date">—</dd></div>
+              <div><dt data-i18n="result.yearType">Year type</dt><dd id="year-type">—</dd></div>
+              <div><dt data-i18n="result.dayChange">Day change</dt><dd id="day-change">—</dd></div>
+            </dl>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section class="explanation shell" aria-labelledby="explanation-title">
+      <div class="explanation-title">
+        <p class="section-kicker" data-i18n="about.kicker">The essentials</p>
+        <h2 id="explanation-title" data-i18n="about.title">Moon rhythm. Solar footing.</h2>
+      </div>
+      <div class="info-grid">
+        <article>
+          <span class="info-number">01</span>
+          <h3 data-i18n="about.modernTitle">Modern by design</h3>
+          <p data-i18n="about.modernText">Shamrock Calendar is a playful modern system, not a claimed reconstruction of an ancient Celtic calendar.</p>
+        </article>
+        <article>
+          <span class="info-number">02</span>
+          <h3 data-i18n="about.newYearTitle">Halloween is New Year</h3>
+          <p data-i18n="about.newYearText">The year begins on the evening of 31 October. Festival days carry the four-leaf Singer Shamrock.</p>
+        </article>
+        <article>
+          <span class="info-number">03</span>
+          <h3 data-i18n="about.basisTitle">A precise civil basis</h3>
+          <p data-i18n="about.basisText">The Revised Julian calendar stays about ten times closer to the tropical year than the Gregorian calendar. Before 1600 the two dates may differ here by roughly one or two days; from 1 March 1600 through this calculator’s range they agree.</p>
+        </article>
+      </div>
+      <p class="sunset-note" data-i18n="about.sunset">No location is requested: sunset is the calendar principle, not an improvised local sunset calculation.</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="shell footer-inner">
+      <div class="footer-brand">
+        <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 31C18 29 14 19 20 14c6-5 13 1 12 14-1-13 6-19 12-14 6 5 2 15-12 17 14-2 18 8 12 13-6 5-13-1-12-14 1 13-6 19-12 14-6-5-2-15 12-13z"/></svg>
+        <div><strong>SINGER SHAMROCK</strong><span data-i18n="footer.brand">A brand of Pierre Christian Ulrich Singer · Entrepreneur individuel (EI)</span></div>
+      </div>
+      <div class="footer-meta">
+        <span data-i18n="footer.product">Shamrock Calendar · modern calendar system</span>
+        <a href="https://singershamrock.com" rel="noopener noreferrer">singershamrock.com</a>
+        <a href="mailto:pcusinger@gmail.com">pcusinger@gmail.com</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
