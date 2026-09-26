@@ -1,3 +1,4 @@
+(() => {
 const {
   RANGE_START,
   RANGE_END,
@@ -367,3 +368,4 @@ function initialize() {
 }
 
 initialize();
+})();
