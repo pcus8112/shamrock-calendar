@@ -1,22 +1,24 @@
-# Shamrock Calendar — Final Website
+# Shamrock Calendar – GitHub Pages
 
-Veröffentlichungsfertige, statische und vollständig responsive Website ohne externe Laufzeit-Abhängigkeiten.
+Dieses Paket ist direkt für GitHub Pages vorbereitet.
 
-## Dateien
+## Veröffentlichung
 
-- `dist/index.html` — vollständige Website
-- `dist/assets/styles.css` — Gestaltung und mobile Ansichten
-- `dist/assets/app.js` — Benutzeroberfläche und Sprachen EN-US, FR-CA, DE
-- `dist/assets/calendar-engine.js` — getrennte Kalenderberechnung
-- `dist/assets/shamrock-calendar-night.png` — originales Hero-Artwork
-- `tests/calendar.test.mjs` — systematische Rechen- und Strukturtests
+1. Den **Inhalt dieses Pakets** in das Hauptverzeichnis des Repositorys `shamrock-calendar` hochladen.
+2. Vorhandene Dateien gleichen Namens ersetzen.
+3. Unter **Settings → Pages** als Quelle **Deploy from a branch**, Branch **main** und Ordner **/(root)** verwenden.
+4. Als Custom Domain `calendar.singershamrock.com` beibehalten.
 
-## Kurze Endabnahme
+Die Datei `index.html` liegt absichtlich direkt im Hauptverzeichnis. Der Ordner `assets` muss daneben liegen.
 
-1. Die drei Flaggen testen; Standardsprache ist Englisch (USA).
-2. Auf Android prüfen, ob Hero, Datumseingabe und Ergebnis ohne horizontales Scrollen erscheinen.
-3. Die beiden Bereichsgrenzen sowie den Übergang 1 v. Chr. / 1 n. Chr. ausprobieren.
-4. Festtage auf Kleeblatt, Tagesnummer und besondere Hervorhebung bei zusammentreffendem Sonnen- und Monddatum prüfen.
-5. In einem Schaltjahr kontrollieren: Feabhra II hat 30 Tage und kein eigenes Fest; Feabhra I hat 29 Tage und trägt das Februarfest.
+## Richtige Struktur
 
-Tests lokal ausführen: `npm test`
+```text
+index.html
+assets/
+CNAME
+.nojekyll
+README.md
+```
+
+Die Ordner `dist` und `tests` werden für die veröffentlichte GitHub-Pages-Version nicht benötigt.
