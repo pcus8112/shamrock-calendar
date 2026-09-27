@@ -8,9 +8,9 @@
   <title>Shamrock Calendar — A joyful lunisolar calendar</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%2304151b'/%3E%3Cg fill='%237fd4c7' stroke='%23d9b55d' stroke-width='2'%3E%3Cpath d='M32 31C18 29 14 19 20 14c6-5 13 1 12 14-1-13 6-19 12-14 6 5 2 15-12 17 14-2 18 8 12 13-6 5-13-1-12-14 1 13-6 19-12 14-6-5-2-15 12-13z'/%3E%3C/g%3E%3C/svg%3E">
   <link rel="preload" as="image" href="assets/shamrock-calendar-night.png">
-  <link rel="stylesheet" href="assets/styles.css?v=20260926-1">
-  <script src="assets/calendar-engine.js?v=20260926-1" defer></script>
-  <script src="assets/app.js?v=20260926-2" defer></script>
+  <link rel="stylesheet" href="assets/styles.css?v=20260927-1">
+  <script src="assets/calendar-engine.js?v=20260927-1" defer></script>
+  <script src="assets/app.js?v=20260927-1" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#calculator" data-i18n="a11y.skip">Skip to the calculator</a>
@@ -31,10 +31,23 @@
     </div>
   </header>
 
+  <section class="current-date-bar" aria-labelledby="current-date-label">
+    <div class="shell current-date-inner">
+      <div class="current-date-copy">
+        <span class="current-date-label" id="current-date-label" data-i18n="current.label">Stonehenge reference · updated at 00:00 GMT</span>
+        <strong id="current-shamrock-date">—</strong>
+      </div>
+      <div class="current-date-meta">
+        <span class="moon-pill" id="current-moon-phase">—</span>
+        <span class="current-festival" id="current-festival" hidden></span>
+      </div>
+    </div>
+  </section>
+
   <main id="top">
     <section class="hero" aria-labelledby="hero-title">
       <div class="hero-art" aria-hidden="true">
-        <img src="assets/shamrock-calendar-night.png" alt="" width="1672" height="941">
+        <img src="assets/shamrock-calendar-night.png" alt="" width="1536" height="864">
       </div>
       <div class="hero-shade" aria-hidden="true"></div>
       <div class="shell hero-inner">
@@ -42,6 +55,10 @@
           <p class="eyebrow" data-i18n="hero.eyebrow">A modern lunisolar calendar</p>
           <h1 id="hero-title"><span data-i18n="hero.titleA">A new year</span><br><em data-i18n="hero.titleB">under the moon.</em></h1>
           <p class="hero-lead" data-i18n="hero.lead">Twelve Irish month names, a thirteenth month when needed, and Halloween as a joyful New Year.</p>
+          <div class="calendar-span">
+            <span data-i18n="hero.spanCivil">31 October 2574 BCE, evening — 20 November 2427 CE, evening</span>
+            <strong data-i18n="hero.spanShamrock">1 Samhain, Year 1 — 29 Deireadh Fómhair, Year 5000</strong>
+          </div>
         </div>
 
         <section class="calculator" id="calculator" aria-labelledby="calculator-title">
@@ -78,24 +95,30 @@
                 <span data-i18n="calc.button">Calculate</span><span aria-hidden="true">→</span>
               </button>
             </div>
-            <p class="range-note" id="range-note" data-i18n="calc.range">Valid range: 31 October 2574 BCE to 20 November 2427 CE.</p>
+            <p class="range-note" id="range-note" data-i18n="calc.range">Valid range: 31 October 2574 BCE, evening, to 20 November 2427 CE, evening.</p>
             <p class="error-message" id="error-message" role="alert" aria-live="assertive"></p>
           </form>
 
           <div class="result-panel" id="result-panel" role="status" aria-live="polite" aria-atomic="true">
-            <div class="result-primary">
+            <div class="result-summary">
               <p class="result-label" data-i18n="result.label">Your Shamrock date</p>
-              <p class="result-date" id="result-date">—</p>
-              <div class="festival-badge" id="festival-badge" hidden>
-                <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 31C18 29 14 19 20 14c6-5 13 1 12 14-1-13 6-19 12-14 6 5 2 15-12 17 14-2 18 8 12 13-6 5-13-1-12-14 1 13-6 19-12 14-6-5-2-15 12-13z"/></svg>
-                <span id="festival-text"></span>
-              </div>
+              <p class="selected-date" id="selected-date">—</p>
+              <p class="day-change" id="day-change">—</p>
             </div>
-            <dl class="result-details">
-              <div><dt data-i18n="result.selected">Selected date</dt><dd id="selected-date">—</dd></div>
-              <div><dt data-i18n="result.yearType">Year type</dt><dd id="year-type">—</dd></div>
-              <div><dt data-i18n="result.dayChange">Day change</dt><dd id="day-change">—</dd></div>
-            </dl>
+            <div class="sunset-results">
+              <article class="period-card" id="before-period">
+                <p class="period-label" data-i18n="result.before">Before sunset</p>
+                <p class="period-date" id="before-date">—</p>
+                <p class="period-meta"><span id="before-weekday">—</span><span id="before-moon">—</span></p>
+                <div class="festival-badge" id="before-festival" hidden><span class="festival-icons" aria-hidden="true"></span><span class="festival-text"></span></div>
+              </article>
+              <article class="period-card period-card-after" id="after-period">
+                <p class="period-label" data-i18n="result.after">After sunset</p>
+                <p class="period-date" id="after-date">—</p>
+                <p class="period-meta"><span id="after-weekday">—</span><span id="after-moon">—</span></p>
+                <div class="festival-badge" id="after-festival" hidden><span class="festival-icons" aria-hidden="true"></span><span class="festival-text"></span></div>
+              </article>
+            </div>
           </div>
         </section>
       </div>
@@ -115,7 +138,7 @@
         <article>
           <span class="info-number">02</span>
           <h3 data-i18n="about.newYearTitle">Halloween is New Year</h3>
-          <p data-i18n="about.newYearText">The year begins on the evening of 31 October. Festival days carry the four-leaf Singer Shamrock.</p>
+          <p data-i18n="about.newYearText">The year begins on the evening of 31 October. Samhain, Imbolc, Bealtaine and Lúnasa are marked with 🍀 and their seasonal symbol.</p>
         </article>
         <article>
           <span class="info-number">03</span>
