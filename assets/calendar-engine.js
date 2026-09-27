@@ -15,10 +15,10 @@ const LEAP_MONTH_NAMES = Object.freeze([
 ]);
 
 const FESTIVALS = Object.freeze([
-  { key: "samhain", name: "Samhain", solarMonth: 11, solarDay: 1, lunarMonth: "Samhain" },
-  { key: "imbolc", name: "Imbolc", solarMonth: 2, solarDay: 1, lunarMonth: leap => leap ? "Feabhra I" : "Feabhra" },
-  { key: "bealtaine", name: "Bealtaine", solarMonth: 5, solarDay: 1, lunarMonth: "Bealtaine" },
-  { key: "lunasa", name: "Lúnasa", solarMonth: 8, solarDay: 1, lunarMonth: "Lúnasa" }
+  { key: "samhain", name: "Samhain", emoji: "🎃", solarMonth: 11, solarDay: 1, lunarMonth: "Samhain" },
+  { key: "imbolc", name: "Imbolc", emoji: "🕯️", solarMonth: 2, solarDay: 1, lunarMonth: "Feabhra" },
+  { key: "bealtaine", name: "Bealtaine", emoji: "🔥", solarMonth: 5, solarDay: 1, lunarMonth: "Bealtaine" },
+  { key: "lunasa", name: "Lúnasa", emoji: "🌾", solarMonth: 8, solarDay: 1, lunarMonth: "Lúnasa" }
 ]);
 
 function floorMod(value, divisor) {
@@ -155,38 +155,35 @@ function jdToCycleDate(jd) {
 
 function shamrockMonthsForYear(shamrockYear) {
   const baseCycleYear = SHAMROCK_EPOCH_CYCLE_YEAR + shamrockYear - 1;
-  const yearDays = cycleYearDays(baseCycleYear);
   const leap = isCycleLeapYear(baseCycleYear);
-  const firstMonthDays = yearDays % 10 === 3 ? 29 : 30;
-  const finalMonthDays = yearDays % 10 === 5 ? 30 : 29;
-  const lengths = leap
-    ? [firstMonthDays, 29, 30, 30, 29, 30, 29, 30, 29, 30, 29, 30, finalMonthDays]
-    : [firstMonthDays, 29, 30, 29, 30, 29, 30, 29, 30, 29, 30, finalMonthDays];
   const names = leap ? LEAP_MONTH_NAMES : COMMON_MONTH_NAMES;
-  const months = names.map((name, index) => ({
-    number: index + 1,
-    name,
-    days: lengths[index],
-    leapMonth: name === "Feabhra II",
-    festivalMonth: name === "Feabhra" || name === "Feabhra I"
-  }));
-  const calculatedDays = months.reduce((sum, month) => sum + month.days, 0);
-  if (calculatedDays !== yearDays) throw new RangeError("Shamrock year structure does not match its year type");
+  const cycleMonths = leap
+    ? [9, 10, 11, 12, 13, 1, 2, 3, 4, 5, 6, 7, 8]
+    : [9, 10, 11, 12, 1, 2, 3, 4, 5, 6, 7, 8];
+  const months = names.map((name, index) => {
+    const cycleMonth = cycleMonths[index];
+    const cycleYear = cycleMonth === 7 || cycleMonth === 8 ? baseCycleYear + 1 : baseCycleYear;
+    return {
+      number: index + 1,
+      name,
+      days: cycleMonthDays(cycleYear, cycleMonth),
+      cycleYear,
+      cycleMonth,
+      leapMonth: name === "Feabhra II",
+      festivalMonth: name === "Feabhra" || name === "Feabhra I"
+    };
+  });
+  const yearDays = months.reduce((sum, month) => sum + month.days, 0);
   return { months, leap, yearDays, baseCycleYear };
 }
 
 const CALENDAR_ANCHOR_JD = cycleDateToJd(SHAMROCK_EPOCH_CYCLE_YEAR, 9, 1);
-const SHAMROCK_YEAR_STARTS = [null, CALENDAR_ANCHOR_JD];
-for (let shamrockYear = 1; shamrockYear <= 5000; shamrockYear += 1) {
-  SHAMROCK_YEAR_STARTS[shamrockYear + 1] = SHAMROCK_YEAR_STARTS[shamrockYear]
-    + shamrockMonthsForYear(shamrockYear).yearDays;
-}
 
 function shamrockYearStartJd(shamrockYear) {
   if (!Number.isInteger(shamrockYear) || shamrockYear < 1 || shamrockYear > 5001) {
     throw new RangeError("Shamrock year is outside the supported range");
   }
-  return SHAMROCK_YEAR_STARTS[shamrockYear];
+  return cycleDateToJd(SHAMROCK_EPOCH_CYCLE_YEAR + shamrockYear - 1, 9, 1);
 }
 
 function shamrockYearEndJd(shamrockYear) {
@@ -198,68 +195,68 @@ function shamrockYearEndJd(shamrockYear) {
 
 function shamrockDateToJd(shamrockYear, monthName, day = 1) {
   const structure = shamrockMonthsForYear(shamrockYear);
-  const monthIndex = structure.months.findIndex(month => month.name === monthName);
-  if (monthIndex < 0) throw new RangeError("Unknown Shamrock month");
-  const month = structure.months[monthIndex];
+  const normalizedName = monthName === "Feabhra" && structure.leap ? "Feabhra I" : monthName;
+  const month = structure.months.find(entry => entry.name === normalizedName);
+  if (!month) throw new RangeError("Unknown Shamrock month");
   if (!Number.isInteger(day) || day < 1 || day > month.days) throw new RangeError("Invalid Shamrock day");
-  const elapsedDays = structure.months.slice(0, monthIndex).reduce((sum, entry) => sum + entry.days, 0);
-  return shamrockYearStartJd(shamrockYear) + elapsedDays + day - 1;
+  return cycleDateToJd(month.cycleYear, month.cycleMonth, day);
 }
 
 function jdToShamrockDate(jd) {
-  if (jd < SHAMROCK_YEAR_STARTS[1] || jd >= SHAMROCK_YEAR_STARTS[5001]) {
+  if (jd < shamrockYearStartJd(1) || jd >= shamrockYearStartJd(5001)) {
     throw new RangeError("Date is outside the supported Shamrock era");
   }
-  let low = 1;
-  let high = 5000;
-  while (low <= high) {
-    const middle = Math.floor((low + high) / 2);
-    if (jd < SHAMROCK_YEAR_STARTS[middle]) high = middle - 1;
-    else if (jd >= SHAMROCK_YEAR_STARTS[middle + 1]) low = middle + 1;
-    else {
-      const structure = shamrockMonthsForYear(middle);
-      let remaining = Math.floor(jd - SHAMROCK_YEAR_STARTS[middle]);
-      for (const month of structure.months) {
-        if (remaining < month.days) {
-          return {
-            year: middle,
-            month: month.number,
-            monthName: month.name,
-            day: remaining + 1,
-            leap: structure.leap,
-            leapMonth: month.leapMonth,
-            festivalMonth: month.festivalMonth,
-            yearDays: structure.yearDays,
-            baseCycleYear: structure.baseCycleYear
-          };
-        }
-        remaining -= month.days;
-      }
-    }
-  }
-  throw new RangeError("Unable to resolve Shamrock date");
+  const cycle = jdToCycleDate(jd);
+  const shamrockYear = cycle.month === 7 || cycle.month === 8
+    ? cycle.year - SHAMROCK_EPOCH_CYCLE_YEAR
+    : cycle.year - SHAMROCK_EPOCH_CYCLE_YEAR + 1;
+  const structure = shamrockMonthsForYear(shamrockYear);
+  const month = structure.months.find(entry => entry.cycleYear === cycle.year && entry.cycleMonth === cycle.month);
+  if (!month) throw new RangeError("Unable to resolve Shamrock month");
+  return {
+    year: shamrockYear,
+    month: month.number,
+    monthName: month.name,
+    day: cycle.day,
+    monthDays: month.days,
+    leap: structure.leap,
+    leapMonth: month.leapMonth,
+    festivalMonth: month.festivalMonth,
+    yearDays: structure.yearDays,
+    baseCycleYear: structure.baseCycleYear
+  };
 }
 
-function festivalForCivilJd(civilJd, likelyShamrockYear) {
+function weekdayForJd(jd) {
+  return floorMod(Math.floor(jd + 1.5), 7);
+}
+
+function moonPhaseForDay(day) {
+  if (day === 1 || day >= 29) return "new";
+  if (day >= 14 && day <= 16) return "full";
+  if (day >= 2 && day <= 13) return "waxing";
+  return "waning";
+}
+
+function festivalForShamrockJd(shamrockJd, likelyShamrockYear) {
   for (const shamrockYear of [likelyShamrockYear - 1, likelyShamrockYear, likelyShamrockYear + 1]) {
     if (shamrockYear < 1 || shamrockYear > 5000) continue;
     const structure = shamrockMonthsForYear(shamrockYear);
     for (const festival of FESTIVALS) {
-      const lunarMonth = typeof festival.lunarMonth === "function"
-        ? festival.lunarMonth(structure.leap)
-        : festival.lunarMonth;
+      const lunarMonth = festival.key === "imbolc" && structure.leap ? "Feabhra I" : festival.lunarMonth;
       const lunarJd = shamrockDateToJd(shamrockYear, lunarMonth, 1);
       const lunarCivilDate = jdToRevisedJulian(lunarJd);
       const solarJd = revisedJulianToJd(lunarCivilDate.year, festival.solarMonth, festival.solarDay);
       const firstMainDayJd = Math.min(lunarJd, solarJd);
       const lastMainDayJd = Math.max(lunarJd, solarJd);
       const festivalStartJd = firstMainDayJd - 1;
-      if (civilJd >= festivalStartJd && civilJd <= lastMainDayJd) {
-        const dayNumber = civilJd - festivalStartJd;
+      if (shamrockJd >= festivalStartJd && shamrockJd <= lastMainDayJd) {
+        const dayNumber = shamrockJd - festivalStartJd;
         const datesCoincide = lunarJd === solarJd;
         return {
           key: festival.key,
           name: festival.name,
+          emoji: festival.emoji,
           dayNumber,
           datesCoincide,
           emphasized: datesCoincide && (dayNumber === 0 || dayNumber === 1),
@@ -273,10 +270,26 @@ function festivalForCivilJd(civilJd, likelyShamrockYear) {
   return null;
 }
 
+function festivalForCivilJd(civilJd, likelyShamrockYear) {
+  return festivalForShamrockJd(civilJd, likelyShamrockYear);
+}
+
 const RANGE_START_JD = revisedJulianToJd(RANGE_START.year, RANGE_START.month, RANGE_START.day);
 const RANGE_END_JD = revisedJulianToJd(RANGE_END.year, RANGE_END.month, RANGE_END.day);
 const CALENDAR_START_JD = shamrockYearStartJd(1);
 const CALENDAR_END_JD = shamrockYearEndJd(5000);
+
+function periodForShamrockJd(shamrockJd) {
+  if (shamrockJd < CALENDAR_START_JD || shamrockJd > CALENDAR_END_JD) return null;
+  const shamrock = jdToShamrockDate(shamrockJd);
+  return {
+    shamrockJd,
+    shamrock,
+    weekday: weekdayForJd(shamrockJd),
+    moonPhase: moonPhaseForDay(shamrock.day),
+    festival: festivalForShamrockJd(shamrockJd, shamrock.year)
+  };
+}
 
 function convertRevisedJulianDate({ year, month, day }) {
   if (!isValidRevisedJulianDate(year, month, day)) {
@@ -287,28 +300,21 @@ function convertRevisedJulianDate({ year, month, day }) {
     return { ok: false, error: "out-of-range" };
   }
 
-  // The supported era begins at sunset on the civil date before its first full day.
-  // Its last supported civil date remains valid until sunset.
-  let calculationJd = civilJd;
-  let boundary = null;
-  if (civilJd === RANGE_START_JD) {
-    calculationJd = CALENDAR_START_JD;
-    boundary = "opening-sunset";
-  } else if (civilJd === RANGE_END_JD) {
-    calculationJd = CALENDAR_END_JD;
-    boundary = "closing-sunset";
-  }
-
-  const shamrock = jdToShamrockDate(calculationJd);
-  const festival = festivalForCivilJd(civilJd, shamrock.year);
+  const beforeSunset = periodForShamrockJd(civilJd);
+  const afterSunset = periodForShamrockJd(civilJd + 1);
+  const primaryPeriod = beforeSunset || afterSunset;
+  const boundary = beforeSunset ? (afterSunset ? null : "closing-sunset") : "opening-sunset";
   return {
     ok: true,
     input: { year, month, day },
     civilJd,
-    calculationJd,
+    calculationJd: primaryPeriod.shamrockJd,
     boundary,
-    shamrock,
-    festival
+    weekday: weekdayForJd(civilJd),
+    beforeSunset,
+    afterSunset,
+    shamrock: primaryPeriod.shamrock,
+    festival: primaryPeriod.festival
   };
 }
 
@@ -333,6 +339,10 @@ window.ShamrockCalendarEngine = Object.freeze({
   jdToShamrockDate,
   shamrockYearStartJd,
   shamrockYearEndJd,
+  weekdayForJd,
+  moonPhaseForDay,
+  periodForShamrockJd,
+  festivalForShamrockJd,
   festivalForCivilJd,
   convertRevisedJulianDate
 });
